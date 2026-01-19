@@ -19,9 +19,29 @@ variables
 color
 catch_errors
 
-# function update_script() {
-#   # Update logic here
-# }
+function update_script() {
+  header_info
+  check_container_storage
+  check_container_resources
+
+  msg_info "Updating system"
+  $STD sudo apt update -y
+  $STD sudo apt upgrade -y
+  msg_ok "System updated"
+
+  [[ -d /opt/gramps-web ]] || {
+    msg_error "No ${APP} Installation Found!"
+    exit 1
+  }
+
+  msg_info "Updating Gramps Web"
+  cd /opt/gramps-web
+  $STD docker compose pull
+  $STD docker compose up -d
+  msg_ok "Updated successfully!"
+
+  exit
+}
 
 start
 build_container
