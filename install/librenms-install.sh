@@ -38,7 +38,7 @@ $STD apt install -y \
   python3-pip
 msg_ok "Installed Python Dependencies"
 
-PHP_VERSION="8.4" PHP_FPM="YES" PHP_MODULE="gmp,mysql,snmp" setup_php
+PHP_VERSION="8.4" PHP_FPM="YES" PHP_MODULE="snmp" setup_php
 setup_mariadb
 setup_composer
 PYTHON_VERSION="3.13" setup_uv
@@ -50,7 +50,7 @@ $STD useradd librenms -d /opt/librenms -M -r -s "$(which bash)"
 mkdir -p /opt/librenms/{rrd,logs,bootstrap/cache,storage,html}
 cd /opt/librenms
 APP_KEY=$(openssl rand -base64 40 | tr -dc 'a-zA-Z0-9')
-$STD uv venv .venv
+$STD uv venv --clear .venv
 $STD source .venv/bin/activate
 $STD uv pip install -r requirements.txt
 cat <<EOF >/opt/librenms/.env
@@ -78,11 +78,10 @@ sed -i "s/listen = \/run\/php\/php8.4-fpm.sock/listen = \/run\/php-fpm-librenms.
 msg_ok "Configured PHP-FPM"
 
 msg_info "Configure Nginx"
-IP_ADDR=$(hostname -I | awk '{print $1}')
 cat >/etc/nginx/sites-enabled/librenms <<'EOF'
 server {
  listen      80;
- server_name ${IP_ADDR};
+ server_name ${LOCAL_IP};
  root        /opt/librenms/html;
  index       index.php;
 
