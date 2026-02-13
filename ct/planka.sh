@@ -6,7 +6,7 @@ source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxV
 # Source: https://github.com/plankanban/planka
 
 APP="PLANKA"
-var_tags="${var_tags:-Todo,kanban}"
+var_tags="${var_tags:-Todo;kanban}"
 var_cpu="${var_cpu:-1}"
 var_ram="${var_ram:-1024}"
 var_disk="${var_disk:-4}"
@@ -60,6 +60,12 @@ function update_script() {
     [ -d "$BK/attachments" ] && cp -a "$BK/attachments/." /opt/planka/private/attachments/
     rm -rf "$BK"
     msg_ok "Restored data"
+
+    msg_ok "Migrate Database"
+    cd /opt/planka
+    $STD npm run db:upgrade
+    $STD npm run db:migrate
+    msg_ok "Migrated Database"
 
     msg_info "Starting Service"
     systemctl start planka

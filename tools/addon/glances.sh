@@ -30,7 +30,7 @@ function msg_info() { echo -e "${INFO} ${YW}$1...${CL}"; }
 function msg_ok() { echo -e "${CM} ${GN}$1${CL}"; }
 function msg_error() { echo -e "${CROSS} ${RD}$1${CL}"; }
 
-get_local_ip() {
+get_lxc_ip() {
   if command -v hostname >/dev/null 2>&1 && hostname -I 2>/dev/null; then
     hostname -I | awk '{print $1}'
   elif command -v ip >/dev/null 2>&1; then
@@ -39,12 +39,12 @@ get_local_ip() {
     echo "127.0.0.1"
   fi
 }
-IP=$(get_local_ip)
+IP=$(get_lxc_ip)
 
 install_glances_debian() {
   msg_info "Installing dependencies"
   apt-get update >/dev/null 2>&1
-  apt-get install -y gcc lm-sensors wireless-tools >/dev/null 2>&1
+  apt-get install -y gcc lm-sensors wireless-tools curl >/dev/null 2>&1
   msg_ok "Installed dependencies"
 
   msg_info "Setting up Python + uv"
@@ -56,7 +56,7 @@ install_glances_debian() {
   cd /opt
   mkdir -p glances
   cd glances
-  uv venv
+  uv venv --clear
   source .venv/bin/activate >/dev/null 2>&1
   uv pip install --upgrade pip wheel setuptools >/dev/null 2>&1
   uv pip install "glances[web]" >/dev/null 2>&1
@@ -114,7 +114,7 @@ install_glances_alpine() {
   apk update >/dev/null 2>&1
   $STD apk add --no-cache \
     gcc musl-dev linux-headers python3-dev \
-    python3 py3-pip py3-virtualenv lm-sensors wireless-tools >/dev/null 2>&1
+    python3 py3-pip py3-virtualenv lm-sensors wireless-tools curl >/dev/null 2>&1
   msg_ok "Installed dependencies"
 
   msg_info "Setting up Python + uv"
@@ -126,7 +126,7 @@ install_glances_alpine() {
   cd /opt
   mkdir -p glances
   cd glances
-  uv venv
+  uv venv --clear
   source .venv/bin/activate
   uv pip install --upgrade pip wheel setuptools >/dev/null 2>&1
   uv pip install "glances[web]" >/dev/null 2>&1

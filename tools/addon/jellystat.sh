@@ -5,6 +5,11 @@
 # License: MIT | https://github.com/community-scripts/ProxmoxVE/raw/main/LICENSE
 # Source: https://github.com/CyferShepard/Jellystat
 
+if ! command -v curl &>/dev/null; then
+  printf "\r\e[2K%b" '\033[93m Setup Source \033[m' >&2
+  apt-get update >/dev/null 2>&1
+  apt-get install -y curl >/dev/null 2>&1
+fi
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/core.func)
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/tools.func)
 source <(curl -fsSL https://raw.githubusercontent.com/community-scripts/ProxmoxVE/main/misc/error_handler.func)
@@ -265,7 +270,7 @@ After=network.target postgresql.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=${INSTALL_PATH}
+WorkingDirectory=${INSTALL_PATH}/backend
 EnvironmentFile=${CONFIG_PATH}
 ExecStart=/usr/bin/node ${INSTALL_PATH}/backend/server.js
 Restart=always
@@ -325,7 +330,7 @@ if [[ "${type:-}" == "update" ]]; then
 fi
 
 header_info
-import_local_ip
+get_lxc_ip
 
 # Check if already installed
 if [[ -d "$INSTALL_PATH" && -f "$INSTALL_PATH/package.json" ]]; then
